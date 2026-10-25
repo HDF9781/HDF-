@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HDF 创作 · 二中再见给木</title>
+    <style>
+        :root {
+            --win-bg: #f0f2f5;
+            --win-surface: rgba(255, 255, 255, 0.72);
+            --win-surface-solid: #ffffff;
+            --win-border: rgba(0, 0, 0, 0.06);
+            --win-border-strong: rgba(0, 0, 0, 0.09);
+            --win-text: #1a1a1a;
+            --win-text-secondary: #5c5c5c;
+            --win-text-tertiary: #8a8a8a;
+            --win-accent: #0067c0;
+            --win-accent-hover: #005a9e;
+            --win-shadow: 0 4px 16px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.03);
+            --win-shadow-hover: 0 12px 32px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.04);
+            --radius: 10px;
+            --radius-lg: 14px;
+            --glass: blur(24px) saturate(160%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: "Segoe UI Variable", "Segoe UI", system-ui, -apple-system, sans-serif;
+            background: var(--win-bg);
+            color: var(--win-text);
+            line-height: 1.5;
+            font-size: 15px;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+
+        /* ========== 导航 ========== */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 52px;
+            background: rgba(240, 242, 245, 0.7);
+            backdrop-filter: var(--glass);
+            -webkit-backdrop-filter: var(--glass);
+            border-bottom: 1px solid var(--win-border);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-container {
+            width: 100%;
+            max-width: 1140px;
+            margin: 0 auto;
+            padding: 0 36px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .nav-logo {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--win-text);
+            text-decoration: none;
+            letter-spacing: -0.02em;
+        }
+
+        .nav-menu {
+            display: flex;
+            list-style: none;
+            gap: 2px;
+        }
+
+        .nav-link {
+            color: var(--win-text-secondary);
+            text-decoration: none;
+            font-size: 13.5px;
+            font-weight: 500;
+            padding: 7px 16px;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .nav-link:hover {
+            background: rgba(0, 0, 0, 0.04);
+            color: var(--win-text);
+        }
+
+        .nav-link.active {
+            background: rgba(0, 103, 192, 0.1);
+            color: var(--win-accent);
+        }
+
+        /* ========== Hero ========== */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 120px 36px 100px;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(165deg, #e8f0fe 0%, #f0f2f5 45%, #f8f9fb 100%);
+        }
+
+        /* 装饰线条 */
+        .hero-lines {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .hero-line {
+            position: absolute;
+            background: linear-gradient(90deg, transparent, rgba(0, 103, 192, 0.08), transparent);
+            height: 1px;
+        }
+
+        .hero-line:nth-child(1) { top: 22%; left: -10%; width: 50%; animation: lineMove 18s linear infinite; }
+        .hero-line:nth-child(2) { top: 48%; right: -5%; width: 40%; animation: lineMove 22s linear infinite reverse; }
+        .hero-line:nth-child(3) { top: 72%; left: 10%; width: 35%; animation: lineMove 16s linear infinite; }
+
+        .hero-vline {
+            position: absolute;
+            width: 1px;
+            background: linear-gradient(180deg, transparent, rgba(0, 103, 192, 0.06), transparent);
+        }
+
+        .hero-vline:nth-child(4) { left: 18%; top: 10%; height: 60%; }
+        .hero-vline:nth-child(5) { right: 22%; top: 20%; height: 50%; }
+
+        @keyframes lineMove {
+            0% { transform: translateX(-30px); opacity: 0.3; }
+            50% { opacity: 0.7; }
+            100% { transform: translateX(30px); opacity: 0.3; }
+        }
+
+        .hero-content {
+            max-width: 660px;
+            text-align: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero-title {
+            font-size: clamp(2.1rem, 4.8vw, 2.9rem);
+            font-weight: 600;
+            letter-spacing: -0.03em;
+            line-height: 1.15;
+            margin-bottom: 18px;
+            color: var(--win-text);
+            opacity: 0;
+            transform: translateY(24px);
+            animation: fadeUp 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.1s forwards;
+        }
+
+        .hero-text {
+            font-size: 16px;
+            color: var(--win-text-secondary);
+            margin-bottom: 42px;
+            line-height: 1.65;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeUp 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.25s forwards;
+        }
+
+        .hero-btns {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+            opacity: 0;
+            transform: translateY(16px);
+            animation: fadeUp 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.4s forwards;
+        }
+
+        @keyframes fadeUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 38px;
+            padding: 0 22px;
+            border-radius: 7px;
+            font-size: 13.5px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: var(--win-accent);
+            color: #ffffff;
+            box-shadow: 0 2px 8px rgba(0, 103, 192, 0.25);
+        }
+
+        .btn-primary:hover {
+            background: var(--win-accent-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 14px rgba(0, 103, 192, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--win-surface);
+            backdrop-filter: var(--glass);
+            -webkit-backdrop-filter: var(--glass);
+            color: var(--win-text);
+            border: 1px solid var(--win-border-strong);
+            box-shadow: var(--win-shadow);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.9);
+            transform: translateY(-1px);
+        }
+
+        /* ========== 通用 Section ========== */
+        .section {
+            padding: 96px 36px;
+            position: relative;
+        }
+
+        .section-alt {
+            background: linear-gradient(180deg, #f8f9fb 0%, #f0f2f5 100%);
+        }
+
+        .container {
+            max-width: 1140px;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            margin-bottom: 48px;
+            max-width: 540px;
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            letter-spacing: -0.025em;
+            margin-bottom: 12px;
+            color: var(--win-text);
+        }
+
+        .section-desc {
+            font-size: 15px;
+            color: var(--win-text-secondary);
+            line-height: 1.65;
+        }
+
+        /* 入场动画类 */
+        .reveal {
+            opacity: 0;
+            transform: translateY(28px);
+            transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ========== 特性卡片 ========== */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 40px;
+        }
+
+        .feature-card {
+            background: var(--win-surface);
+            backdrop-filter: var(--glass);
+            -webkit-backdrop-filter: var(--glass);
+            border: 1px solid var(--win-border);
+            border-radius: var(--radius-lg);
+            padding: 28px 24px;
+            box-shadow: var(--win-shadow);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(0, 103, 192, 0.25), transparent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .feature-card:hover {
+            box-shadow: var(--win-shadow-hover);
+            transform: translateY(-4px);
+            border-color: rgba(0, 103, 192, 0.15);
+        }
+
+        .feature-card:hover::before {
+            opacity: 1;
+        }
+
+        .feature-card h3 {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--win-text);
+        }
+
+        .feature-card p {
+            font-size: 13.5px;
+            color: var(--win-text-secondary);
+            line-height: 1.55;
+        }
+
+        /* ========== 游戏展示区（已修复） ========== */
+        .game-showcase {
+            background: var(--win-surface);
+            backdrop-filter: var(--glass);
+            -webkit-backdrop-filter: var(--glass);
+            border: 1px solid var(--win-border);
+            border-radius: 16px;
+            box-shadow: var(--win-shadow);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .game-showcase::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: 16px;
+            pointer-events: none;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+        }
+
+        .game-window {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .game-titlebar {
+            height: 40px;
+            background: rgba(255, 255, 255, 0.5);
+            border-bottom: 1px solid var(--win-border);
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            gap: 8px;
+        }
+
+        .game-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #ddd;
+        }
+
+        .game-dot:nth-child(1) { background: #ff5f57; }
+        .game-dot:nth-child(2) { background: #febc2e; }
+        .game-dot:nth-child(3) { background: #28c840; }
+
+        .game-titlebar span {
+            margin-left: 12px;
+            font-size: 12.5px;
+            color: var(--win-text-secondary);
+            font-weight: 500;
+        }
+
+        .game-body {
+            min-height: 380px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(160deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-body-content {
+            text-align: center;
+            color: #fff;
+            position: relative;
+            z-index: 2;
+            padding: 40px;
+        }
+
+        .game-body-content h3 {
+            font-size: 1.6rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            margin-bottom: 8px;
+            text-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .game-body-content p {
+            font-size: 14px;
+            opacity: 0.75;
+            margin-bottom: 28px;
+        }
+
+        .game-body-content .btn {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            color: #fff;
+        }
+
+        .game-body-content .btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        /* 游戏背景装饰线条 */
+        .game-deco {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+        }
+
+        .game-deco span {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .game-deco span:nth-child(1) {
+            width: 1px;
+            height: 100%;
+            left: 20%;
+        }
+        .game-deco span:nth-child(2) {
+            width: 1px;
+            height: 100%;
+            right: 25%;
+        }
+        .game-deco span:nth-child(3) {
+            height: 1px;
+            width: 100%;
+            top: 30%;
+        }
+        .game-deco span:nth-child(4) {
+            height: 1px;
+            width: 100%;
+            bottom: 25%;
+        }
+
+        /* ========== 结局 ========== */
+        .endings-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 14px;
+        }
+
+        .ending-card {
+            background: var(--win-surface);
+            backdrop-filter: var(--glass);
+            -webkit-backdrop-filter: var(--glass);
+            border: 1px solid var(--win-border);
+            border-radius: var(--radius-lg);
+            padding: 24px 18px;
+            box-shadow: var(--win-shadow);
+            transition: all 0.3s ease;
+        }
+
+        .ending-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--win-shadow-hover);
+        }
+
+        .ending-badge {
+            display: inline-block;
+            font-size: 10.5px;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            padding: 3px 9px;
+            border-radius: 4px;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+        }
+
+        .ending-true   { background: #e6f4ea; color: #137333; }
+        .ending-good   { background: #e8f0fe; color: #1a73e8; }
+        .ending-normal { background: #f3e8fd; color: #7627bb; }
+        .ending-bad    { background: #fce8e6; color: #c5221f; }
+        .ending-special{ background: #fef7e0; color: #b06000; }
+
+        .ending-card h3 {
+            font-size: 14.5px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: var(--win-text);
+        }
+
+        .ending-card p {
+            font-size: 12.5px;
+            color: var(--win-text-secondary);
+            line-height: 1.5;
+        }
+
+        /* ========== 终端游戏 ========== */
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+        }
+
+        .game-card {
+            background: var(--win-surface);
+            backdrop-filter: var(--glass);
+            -webkit-backdrop-filter: var(--glass);
+            border: 1px solid var(--win-border);
+            border-radius: var(--radius-lg);
+            padding: 28px 22px;
+            box-shadow: var(--win-shadow);
+            transition: all 0.3s ease;
+        }
+
+        .game-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--win-shadow-hover);
+        }
+
+        .game-card h3 {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: var(--win-text);
+        }
+
+        .game-card p {
+            font-size: 13.5px;
+            color: var(--win-text-secondary);
+            margin-bottom: 16px;
+        }
+
+        .tag {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--win-accent);
+            background: rgba(0, 103, 192, 0.08);
+            padding: 3px 8px;
+            border-radius: 4px;
+        }
+
+        /* ========== 关于 ========== */
+        .about-grid {
+            display: grid;
+            grid-template-columns: 1.4fr 1fr;
+            gap: 48px;
+            align-items: start;
+        }
+
+        .about-text p {
+            font-size: 15px;
+            color: var(--win-text-secondary);
+            margin-bottom: 16px;
+            line-height: 1.65;
+        }
+
+        .about-text ul {
+            margin: 16px 0 16px 18px;
+            color: var(--win-text-secondary);
+        }
+
+        .about-text li {
+            margin-bottom: 8px;
+            font-size: 14.5px;
+        }
+
+        .about-text strong {
+            color: var(--win-text);
+            font-weight: 600;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .stat-item {
+            background: var(--win-surface);
+            backdrop-filter: var(--glass);
+            -webkit-backdrop-filter: var(--glass);
+            border: 1px solid var(--win-border);
+            border-radius: var(--radius-lg);
+            padding: 26px 18px;
+            box-shadow: var(--win-shadow);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .stat-item:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--win-shadow-hover);
+        }
+
+        .stat-number {
+            font-size: 28px;
+            font-weight: 600;
+            color: var(--win-accent);
+            letter-spacing: -0.02em;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: var(--win-text-secondary);
+        }
+
+        /* ========== 页脚 ========== */
+        .footer {
+            border-top: 1px solid var(--win-border);
+            padding: 32px 36px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(12px);
+        }
+
+        .footer p {
+            font-size: 13px;
+            color: var(--win-text-tertiary);
+            margin-bottom: 2px;
+        }
+
+        /* ========== 响应式 ========== */
+        @media (max-width: 1000px) {
+            .features-grid,
+            .games-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .endings-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            .about-grid {
+                grid-template-columns: 1fr;
+                gap: 36px;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .nav-menu { display: none; }
+            .features-grid,
+            .games-grid,
+            .endings-grid {
+                grid-template-columns: 1fr;
+            }
+            .section { padding: 72px 20px; }
+            .nav-container { padding: 0 20px; }
+            .hero { padding: 110px 20px 80px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航 -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="#" class="nav-logo">HDF 创作</a>
+            <ul class="nav-menu">
+                <li><a href="#home" class="nav-link active">首页</a></li>
+                <li><a href="#game" class="nav-link">视觉小说</a></li>
+                <li><a href="#terminal" class="nav-link">终端游戏</a></li>
+                <li><a href="#about" class="nav-link">关于</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero" id="home">
+        <div class="hero-lines">
+            <div class="hero-line"></div>
+            <div class="hero-line"></div>
+            <div class="hero-line"></div>
+            <div class="hero-vline"></div>
+            <div class="hero-vline"></div>
+        </div>
+        <div class="hero-content">
+            <h1 class="hero-title">欢迎来到 HDF 创作</h1>
+            <p class="hero-text">
+                在这里你可以体验由 HDF 创造的视觉小说<br>
+                「二中再见给木 · 放学后的约定」以及经典终端小游戏合集
+            </p>
+            <div class="hero-btns">
+                <a href="#game" class="btn btn-primary">立即体验</a>
+                <a href="#about" class="btn btn-secondary">了解更多</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- 视觉小说 -->
+    <section class="section" id="game">
+        <div class="container">
+            <div class="section-header reveal">
+                <h2 class="section-title">二中再见给木 · 放学后的约定</h2>
+                <p class="section-desc">
+                    一款纯爱视觉小说原型，带有完整主界面。<br>
+                    包含启动动画、照片立绘、多种表情变化与完整剧情结局。
+                </p>
+            </div>
+
+            <div class="features-grid">
+                <div class="feature-card reveal">
+                    <h3>精彩剧情</h3>
+                    <p>序章 + 七章 + 终章 + 尾声，11 个选项，5 种结局</p>
+                </div>
+                <div class="feature-card reveal">
+                    <h3>存档系统</h3>
+                    <p>自动存档 + 3 个手动存档位，使用 localStorage 保存</p>
+                </div>
+                <div class="feature-card reveal">
+                    <h3>音频体验</h3>
+                    <p>BGM 与音效音量调节，支持打字音效</p>
+                </div>
+                <div class="feature-card reveal">
+                    <h3>立绘展示</h3>
+                    <p>照片立绘 + 局部变形表情，共 8 种状态</p>
+                </div>
+            </div>
+
+            <!-- 游戏展示（已修复） -->
+            <div class="game-showcase reveal">
+                <div class="game-window">
+                    <div class="game-titlebar">
+                        <div class="game-dot"></div>
+                        <div class="game-dot"></div>
+                        <div class="game-dot"></div>
+                        <span>二中再见给木 · 放学后的约定</span>
+                    </div>
+                    <div class="game-body">
+                        <div class="game-deco">
+                            <span></span><span></span><span></span><span></span>
+                        </div>
+                        <div class="game-body-content">
+                            <h3>二中再见给木</h3>
+                            <p>放学后的约定</p>
+                            <a href="game/index.html" class="btn" target="_blank">开始游戏</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 结局 -->
+    <section class="section section-alt" id="endings">
+        <div class="container">
+            <div class="section-header reveal">
+                <h2 class="section-title">丰富的结局体验</h2>
+            </div>
+
+            <div class="endings-grid">
+                <div class="ending-card reveal">
+                    <div class="ending-badge ending-true">True End</div>
+                    <h3>烟火下的告白</h3>
+                    <p>好感度 ≥ 80<br>「我喜欢你。」</p>
+                </div>
+                <div class="ending-card reveal">
+                    <div class="ending-badge ending-good">Good End</div>
+                    <h3>朋友以上</h3>
+                    <p>好感度 ≥ 75<br>「明天也一起回家吧。」</p>
+                </div>
+                <div class="ending-card reveal">
+                    <div class="ending-badge ending-normal">Normal End</div>
+                    <h3>下次再说</h3>
+                    <p>好感度 75–79<br>「我喜欢你。」</p>
+                </div>
+                <div class="ending-card reveal">
+                    <div class="ending-badge ending-bad">Bad End</div>
+                    <h3>错过</h3>
+                    <p>好感度 &lt; 75<br>遗憾收场</p>
+                </div>
+                <div class="ending-card reveal">
+                    <div class="ending-badge ending-special">Special End</div>
+                    <h3>夏日未晚</h3>
+                    <p>隐藏结局<br>TRUE 路线 + 特殊条件</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 终端游戏 -->
+    <section class="section" id="terminal">
+        <div class="container">
+            <div class="section-header reveal">
+                <h2 class="section-title">终端小游戏合集</h2>
+                <p class="section-desc">
+                    经典命令行小游戏，纯 Python 实现，无需额外依赖。<br>
+                    需在本地 Python 环境中运行。
+                </p>
+            </div>
+
+            <div class="games-grid">
+                <div class="game-card reveal">
+                    <h3>猜数字</h3>
+                    <p>Guess the Number</p>
+                    <span class="tag">Python</span>
+                </div>
+                <div class="game-card reveal">
+                    <h3>井字棋</h3>
+                    <p>Tic-Tac-Toe</p>
+                    <span class="tag">Python</span>
+                </div>
+                <div class="game-card reveal">
+                    <h3>猜单词</h3>
+                    <p>Hangman</p>
+                    <span class="tag">Python</span>
+                </div>
+                <div class="game-card reveal">
+                    <h3>贪吃蛇</h3>
+                    <p>Snake</p>
+                    <span class="tag">Python</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 关于 -->
+    <section class="section section-alt" id="about">
+        <div class="container">
+            <div class="section-header reveal">
+                <h2 class="section-title">关于 HDF</h2>
+            </div>
+
+            <div class="about-grid">
+                <div class="about-text reveal">
+                    <p><strong>HDF</strong> 是一个专注于创造有趣游戏与应用的个人创作平台。</p>
+                    <p>本网站目前展示了两个主要作品：</p>
+                    <ul>
+                        <li><strong>二中再见给木 · 放学后的约定</strong>：纯前端恋爱视觉小说，支持浏览器直接运行</li>
+                        <li><strong>终端小游戏合集</strong>：经典命令行游戏集合，使用 Python 实现</li>
+                    </ul>
+                    <p>所有内容均由 HDF 创作，仅供娱乐，请勿用于商业用途。</p>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-item reveal">
+                        <div class="stat-number">1</div>
+                        <div class="stat-label">视觉小说</div>
+                    </div>
+                    <div class="stat-item reveal">
+                        <div class="stat-number">2</div>
+                        <div class="stat-label">终端小游戏</div>
+                    </div>
+                    <div class="stat-item reveal">
+                        <div class="stat-number">3</div>
+                        <div class="stat-label">核心特性</div>
+                    </div>
+                    <div class="stat-item reveal">
+                        <div class="stat-number">4</div>
+                        <div class="stat-label">外部依赖</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        <p>© 2026 HDF 创作展示</p>
+        <p>HDF 制作，仅供娱乐</p>
+    </footer>
+
+    <script>
+        // 滚动入场动画
+        const reveals = document.querySelectorAll('.reveal');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry, index) => {
+                if (entry.isIntersecting) {
+                    setTimeout(() => {
+                        entry.target.classList.add('visible');
+                    }, index * 60);
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.12 });
+
+        reveals.forEach(el => observer.observe(el));
+    </script>
+</body>
+</html>
