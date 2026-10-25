@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>二中旮旯给木</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="stage" id="stage" data-mode="title">
+        <!-- 场景背景 -->
+        <div class="bg bg-classroom active" data-bg="classroom" aria-hidden="true">
+            <div class="cl-sun"></div>
+            <div class="cl-board"></div>
+            <div class="cl-windows"><span></span><span></span><span></span></div>
+            <div class="cl-desk-row"></div>
+            <div class="cl-dust"></div>
+        </div>
+        <div class="bg bg-corridor" data-bg="corridor" aria-hidden="true">
+            <div class="cr-light"></div>
+            <div class="cr-windows"><span></span><span></span><span></span><span></span></div>
+            <div class="cr-doors"></div>
+            <div class="cr-floor"></div>
+        </div>
+        <div class="bg bg-roof" data-bg="roof" aria-hidden="true">
+            <div class="rf-sun"></div>
+            <div class="rf-clouds"><i></i><i></i><i></i></div>
+            <div class="rf-city"></div>
+            <div class="rf-railing"></div>
+        </div>
+        <div class="bg bg-street" data-bg="street" aria-hidden="true">
+            <div class="st-buildings"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+            <div class="st-lights"><i></i><i></i><i></i><i></i></div>
+            <div class="st-road"></div>
+        </div>
+        <div class="bg bg-river" data-bg="river" aria-hidden="true">
+            <div class="rv-water"></div>
+            <div class="rv-bank"></div>
+            <div class="rv-bridge"></div>
+        </div>
+        <div class="bg bg-festival" data-bg="festival" aria-hidden="true">
+            <div class="fs-glow"></div>
+            <div class="fs-lanterns">
+                <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+            </div>
+            <div class="fs-stalls"></div>
+            <div class="fs-crowd"></div>
+        </div>
+        <div class="bg bg-night" data-bg="night" aria-hidden="true">
+            <div class="nt-stars"></div>
+            <div class="nt-moon"></div>
+            <div class="rf-city"></div>
+        </div>
+
+        <div class="bg-vignette" aria-hidden="true"></div>
+        <div class="petals" id="petals" aria-hidden="true"></div>
+
+        <!-- 女主角立绘 -->
+        <div class="portrait" id="portrait" data-mood="normal" data-blink="0" aria-hidden="true">
+            <div class="portrait-inner">
+                <img class="portrait-img" src="heroine.png" alt="">
+                <span class="fx fx-blush fx-blush-l"></span>
+                <span class="fx fx-blush fx-blush-r"></span>
+                <span class="fx fx-sparkle fx-sparkle-a">✨</span>
+                <span class="fx fx-sparkle fx-sparkle-b">✨</span>
+                <span class="fx fx-heart">💗</span>
+                <span class="fx fx-sweat">💧</span>
+                <span class="fx fx-anger">💢</span>
+                <span class="fx fx-exclaim">❗</span>
+                <span class="fx fx-note">♪</span>
+            </div>
+        </div>
+
+        <!-- 视觉小说界面 -->
+        <div class="vn" id="vn">
+            <header class="topbar">
+                <div class="topbar-left">
+                    <span class="topbar-title">二中旮旯给木</span>
+                    <div class="affection-meter" id="affectionMeter" title="好感度">
+                        <span class="hp on">♥</span><span class="hp">♥</span><span class="hp">♥</span><span class="hp">♥</span><span class="hp">♥</span>
+                        <span class="affection-num" id="affectionNum">10</span>
+                        <span class="aff-delta" id="affDelta"></span>
+                    </div>
+                </div>
+                <div class="topbar-btns">
+                    <button id="menuBtn" class="pill" type="button">菜单</button>
+                    <button id="logBtn" class="pill" type="button">记录</button>
+                    <button id="autoBtn" class="pill" type="button">自动</button>
+                    <button id="skipBtn" class="pill" type="button">快进</button>
+                    <button id="muteBtn" class="icon-btn" type="button" title="音效开关" aria-label="音效开关">🔊</button>
+                </div>
+            </header>
+
+            <div class="choices" id="choices"></div>
+
+            <div class="dialogue" id="dialogueBox">
+                <div class="namebox" id="namebox">操曾希</div>
+                <div class="text" id="vnText"></div>
+                <div class="next-hint" id="nextHint">▼</div>
+            </div>
+        </div>
+
+        <!-- 章节标题 -->
+        <div class="chapter-card" id="chapterCard" aria-hidden="true">
+            <div class="chapter-line"></div>
+            <div class="chapter-kicker" id="chapterKicker">序章</div>
+            <div class="chapter-sub" id="chapterSub">放学后的教室</div>
+            <div class="chapter-line"></div>
+        </div>
+
+        <!-- 主界面 -->
+        <div class="overlay menu-screen active" id="mainMenu">
+            <div class="menu-inner">
+                <p class="menu-kicker">恋爱视觉小说</p>
+                <h1 class="menu-logo">二中旮旯<span>给木</span></h1>
+                <p class="menu-sub">放 学 后 的 约 定</p>
+                <div class="menu-divider"></div>
+                <nav class="menu-list">
+                    <button class="menu-item" id="menuNew" type="button"><span>开始游戏</span><span class="en">NEW GAME</span></button>
+                    <button class="menu-item" id="menuContinue" type="button"><span>继续游戏</span><span class="en">CONTINUE</span></button>
+                    <button class="menu-item" id="menuLoad" type="button"><span>读取存档</span><span class="en">LOAD</span></button>
+                    <button class="menu-item" id="menuSettings" type="button"><span>设置</span><span class="en">CONFIG</span></button>
+                    <button class="menu-item" id="menuGallery" type="button"><span>结局鉴赏</span><span class="en">GALLERY</span><span class="menu-badge" id="menuEndingBadge">0 / 5</span></button>
+                    <button class="menu-item" id="menuAbout" type="button"><span>关于</span><span class="en">ABOUT</span></button>
+                </nav>
+            </div>
+            <div class="menu-controls">
+                <button id="menuMuteBtn" class="icon-btn" type="button" aria-label="音效开关">🔊</button>
+                <button id="menuFullBtn" class="icon-btn" type="button" aria-label="全屏">⛶</button>
+            </div>
+            <div class="menu-footer">
+                <span>v1.0 · HDF制作 · 仅供娱乐</span>
+                <span>点击 / 空格推进 · Esc 菜单</span>
+            </div>
+        </div>
+
+        <!-- 启动画面 -->
+        <div class="splash" id="splash" role="dialog" aria-label="HDF 启动画面">
+            <div class="splash-glow" aria-hidden="true"></div>
+            <div class="splash-rings" aria-hidden="true"><i></i><i></i></div>
+            <div class="splash-inner">
+                <div class="splash-letters" aria-label="HDF">
+                    <span>H</span><span>D</span><span>F</span>
+                </div>
+                <div class="splash-line" aria-hidden="true"></div>
+                <div class="splash-game">二中旮旯给木</div>
+                <div class="splash-sub">P R E S E N T S</div>
+            </div>
+            <div class="splash-skip">点击跳过</div>
+        </div>
+
+        <!-- 游戏内菜单 -->
+        <div class="overlay" id="gameMenu">
+            <div class="modal-panel small">
+                <header class="modal-head">
+                    <span>菜单</span>
+                    <button id="gameMenuClose" class="icon-btn" type="button" aria-label="关闭">×</button>
+                </header>
+                <div class="modal-body">
+                    <div class="game-menu-buttons">
+                        <button id="gmResume" class="gm-btn" type="button">返回游戏</button>
+                        <button id="gmSave" class="gm-btn" type="button">保存进度</button>
+                        <button id="gmLoad" class="gm-btn" type="button">读取进度</button>
+                        <button id="gmSettings" class="gm-btn" type="button">设置</button>
+                        <button id="gmTitle" class="gm-btn danger" type="button">回到标题</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 通用弹窗（存档 / 设置 / 鉴赏 / 关于） -->
+        <div class="overlay modal-overlay" id="modalOverlay">
+            <div class="modal-panel">
+                <header class="modal-head">
+                    <span id="modalTitle">设置</span>
+                    <button id="modalClose" class="icon-btn" type="button" aria-label="关闭">×</button>
+                </header>
+                <div class="modal-body" id="modalBody"></div>
+            </div>
+        </div>
+
+        <div class="toast" id="toast"></div>
+
+        <!-- 结局 -->
+        <div class="overlay" id="endingOverlay">
+            <div class="ending-card">
+                <p class="ending-label" id="eLabel">TRUE END</p>
+                <h2 class="ending-title" id="eTitle">烟火下的告白</h2>
+                <p class="ending-desc" id="eDesc">…</p>
+                <div class="ending-stats">
+                    <div><span>好感度</span><strong id="eAffection">0</strong></div>
+                    <div><span>结局</span><strong id="eEnding">TRUE</strong></div>
+                    <div><span>已解锁</span><strong id="eUnlocked">1 / 5</strong></div>
+                </div>
+                <div class="panel-actions">
+                    <button class="btn btn-primary" id="playAgainBtn" type="button">再玩一次</button>
+                    <button class="btn btn-ghost" id="toTitleBtn" type="button">回到标题</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 对话记录 -->
+        <div class="overlay backlog-overlay" id="backlogOverlay">
+            <div class="backlog-panel">
+                <header class="backlog-head">
+                    <span>对话记录</span>
+                    <button id="logClose" class="icon-btn" type="button" aria-label="关闭">×</button>
+                </header>
+                <div class="backlog-list" id="backlogList"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
