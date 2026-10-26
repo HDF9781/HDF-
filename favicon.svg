@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="hGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0078d4;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#5bb8ff;stop-opacity:1" />
+    </linearGradient>
+    <filter id="softShadow">
+      <feGaussianBlur stdDeviation="1.5" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <!-- White background -->
+  <rect x="4" y="4" width="56" height="56" rx="12" ry="12" fill="#ffffff" stroke="#e5e7eb" stroke-width="1"/>
+  <!-- H letter with gradient blue -->
+  <path d="M16 18 L16 46 L22 46 L22 34 L42 34 L42 46 L48 46 L48 18 L42 18 L42 30 L22 30 L22 18 Z" fill="url(#hGrad)" filter="url(#softShadow)"/>
+</svg>
