@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>终端小游戏合集 · HDF 创作</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg?v=2">
+    <style>
+        :root {
+            --win-bg: #f0f2f5;
+            --win-surface: rgba(255, 255, 255, 0.72);
+            --win-surface-solid: #ffffff;
+            --win-border: rgba(0, 0, 0, 0.06);
+            --win-border-strong: rgba(0, 0, 0, 0.09);
+            --win-text: #1a1a1a;
+            --win-text-secondary: #5c5c5c;
+            --win-text-tertiary: #8a8a8a;
+            --win-accent: #0067c0;
+            --win-accent-hover: #005a9e;
+            --win-shadow: 0 4px 16px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.03);
+            --win-shadow-hover: 0 12px 32px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.04);
+            --radius: 10px;
+            --radius-lg: 14px;
+            --glass: blur(24px) saturate(160%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: "Segoe UI Variable", "Segoe UI", system-ui, -apple-system, sans-serif;
+            background: linear-gradient(165deg, #e8f0fe 0%, #f0f2f5 45%, #f8f9fb 100%);
+            background-attachment: fixed;
+            color: var(--win-text);
+            line-height: 1.5;
+            font-size: 15px;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* ========== 导航 ========== */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 52px;
+            background: rgba(240, 242, 245, 0.7);
+            backdrop-filter: var(--glass);
+            -webkit-backdrop-filter: var(--glass);
+            border-bottom: 1px solid var(--win-border);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            animation: slideDown 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .nav-container {
+            width: 100%;
+            max-width: 1140px;
+            margin: 0 auto;
+            padding: 0 36px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .nav-logo {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--win-text);
+            text-decoration: none;
+            letter-spacing: -0.02em;
+            transition: opacity 0.2s ease;
+        }
+
+        .nav-logo:hover {
+            opacity: 0.8;
+        }
+
+        .nav-menu {
+            display: flex;
+            list-style: none;
+            gap: 2px;
+        }
+
+        .nav-link {
+            color: var(--win-text-secondary);
+            text-decoration: none;
+            font-size: 13.5px;
+            font-weight: 500;
+            padding: 7px 16px;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .nav-link:hover {
+            background: rgba(0, 0, 0, 0.04);
+            color: var(--win-text);
+        }
+
+        .nav-link.active {
+            background: rgba(0, 103, 192, 0.1);
+            color: var(--win-accent);
+        }
+
+        /* ========== 页面头部 ========== */
+        .page-header {
+            padding: 120px 36px 60px;
+            max-width: 1140px;
+            margin: 0 auto;
+            animation: fadeUp 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.1s forwards;
+            opacity: 0;
+            transform: translateY(24px);
+        }
+
+        .page-title {
+            font-size: clamp(2rem, 4.8vw, 2.8rem);
+            font-weight: 600;
+            letter-spacing: -0.03em;
+            line-height: 1.15;
+            margin-bottom: 12px;
+            color: var(--win-text);
+        }
+
+        .page-desc {
+            font-size: 16px;
+            color: var(--win-text-secondary);
+            line-height: 1.65;
+        }
+
+        @keyframes fadeUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ========== 主内容布局 ========== */
+        .layout {
+            width: min(1140px, 100%);
+            margin: 0 auto;
+            padding: 0 36px 80px;
+            display: grid;
+            grid-template-columns: minmax(260px, 300px) 1fr;
+            gap: 24px;
+            align-items: start;
+            animation: fadeUp 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.25s forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        @media (max-width: 920px) {
+            .layout {
+                grid-template-columns: 1fr;
+                padding: 0 20px 40px;
+            }
+            .page-header {
+                padding: 100px 20px 40px;
+            }
+            .nav-container {
+                padding: 0 20px;
+            }
+        }
+
+        /* ========== 左侧菜单面板 ========== */
+        .panel {
+            border-radius: 16px;
+            border: 1px solid var(--win-border);
+            background: var(--win-surface);
+            backdrop-filter: var(--glass);
+            -webkit-backdrop-filter: var(--glass);
+            box-shadow: var(--win-shadow);
+            overflow: hidden;
+            position: relative;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .panel::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: 16px;
+            pointer-events: none;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+        }
+
+        .panel:hover {
+            box-shadow: var(--win-shadow-hover);
+        }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 22px;
+            border-bottom: 1px solid var(--win-border);
+            background: rgba(255, 255, 255, 0.4);
+            position: relative;
+            z-index: 1;
+        }
+
+        .dots {
+            display: flex;
+            gap: 8px;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f57; }
+        .dot.yellow { background: #febc2e; }
+        .dot.green { background: #28c840; }
+
+        .panel-title {
+            color: var(--win-text-secondary);
+            font-size: 11px;
+            letter-spacing: 0.8em;
+            text-transform: uppercase;
+            font-weight: 500;
+        }
+
+        .menu {
+            display: flex;
+            flex-direction: column;
+            padding: 12px 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 26px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 13.5px;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            text-align: left;
+            width: 100%;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .menu-item:hover:not(.active) {
+            background: rgba(0, 0, 0, 0.03);
+        }
+
+        .menu-item.active {
+            background: linear-gradient(90deg, rgba(0, 103, 192, 0.08), transparent);
+        }
+
+        .menu-item.active::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--win-accent);
+        }
+
+        .menu-item .num { 
+            color: var(--win-accent);
+            font-weight: 500;
+        }
+        
+        .menu-item:not(.active) .label { 
+            color: var(--win-text-secondary);
+        }
+        
+        .menu-item.active .label {
+            color: var(--win-text);
+            font-weight: 500;
+        }
+
+        /* 重新开始按钮 */
+        .restart-btn {
+            width: 100%;
+            margin-top: 12px;
+            padding: 10px 16px;
+            background: rgba(0, 103, 192, 0.06);
+            border: 1px solid rgba(0, 103, 192, 0.2);
+            border-radius: 8px;
+            color: var(--win-accent);
+            font-size: 12.5px;
+            font-weight: 500;
+            cursor: pointer;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            transition: all 0.2s ease;
+            font-family: "Segoe UI Variable", "Segoe UI", system-ui, -apple-system, sans-serif;
+        }
+
+        .restart-btn:hover {
+            background: rgba(0, 103, 192, 0.12);
+            border-color: rgba(0, 103, 192, 0.4);
+            transform: translateY(-1px);
+        }
+
+        .restart-btn:active {
+            transform: translateY(0);
+        }
+
+        /* ========== 右侧游戏区域 ========== */
+        .terminal {
+            border-radius: 16px;
+            border: 1px solid var(--win-border);
+            background: var(--win-surface);
+            backdrop-filter: var(--glass);
+            -webkit-backdrop-filter: var(--glass);
+            box-shadow: var(--win-shadow);
+            overflow: hidden;
+            min-height: min(720px, 80dvh);
+            position: relative;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .terminal::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: 16px;
+            pointer-events: none;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+        }
+
+        .terminal:hover {
+            box-shadow: var(--win-shadow-hover);
+        }
+
+        .terminal-body {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            padding: clamp(24px, 4vw, 48px);
+            overflow: hidden;
+            min-height: min(720px, 80dvh);
+            position: relative;
+            z-index: 1;
+        }
+
+        .log {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            overflow-y: auto;
+            padding-right: 16px;
+            max-height: 500px;
+        }
+
+        .log::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .log::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.02);
+            border-radius: 3px;
+        }
+
+        .log::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 3px;
+        }
+
+        .log::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 0, 0, 0.15);
+        }
+
+        .log-line {
+            white-space: pre-wrap;
+            word-break: break-word;
+            font-size: 13px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(4px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .log-line.system { color: var(--win-accent); font-weight: 500; }
+        .log-line.sub { color: var(--win-text-secondary); }
+        .log-line.warn { color: var(--win-text-secondary); }
+        .log-line.error { color: #c5221f; font-weight: 500; }
+        .log-line.cyan { color: var(--win-accent); }
+        .log-line.yellow { color: #b06000; }
+
+        .prompt-line {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding-top: 8px;
+            border-top: 1px solid var(--win-border);
+        }
+
+        .prompt { 
+            color: var(--win-accent); 
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        
+        .prompt-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            font-size: 13.5px;
+            color: var(--win-text);
+            font-family: "Cascadia Code", "Consolas", monospace;
+        }
+
+        .prompt-input::placeholder {
+            color: var(--win-text-tertiary);
+        }
+
+        /* 棋盘 */
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(90px, 110px));
+            grid-template-rows: repeat(3, minmax(90px, 110px));
+            gap: 12px;
+            align-self: center;
+            justify-self: center;
+            margin: 20px 0;
+        }
+
+        .board-cell {
+            border-radius: 12px;
+            border: 1px solid var(--win-border);
+            background: rgba(255, 255, 255, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: clamp(42px, 7vw, 64px);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: transparent;
+            font-weight: 600;
+        }
+
+        .board-cell:hover:not(.x):not(.o):not(:disabled) {
+            background: rgba(0, 103, 192, 0.06);
+            border-color: rgba(0, 103, 192, 0.3);
+        }
+
+        .board-cell.empty { color: transparent; }
+        .board-cell.x { 
+            color: var(--win-accent);
+            background: rgba(0, 103, 192, 0.08);
+            border-color: rgba(0, 103, 192, 0.3);
+        }
+        .board-cell.o { 
+            color: #fb923c;
+            background: rgba(251, 146, 60, 0.08);
+            border-color: rgba(251, 146, 60, 0.3);
+        }
+
+        /* 猜单词 */
+        .hangman-art {
+            white-space: pre;
+            align-self: center;
+            color: var(--win-text-secondary);
+            line-height: 1.4;
+            font-size: 13px;
+            margin: 20px 0;
+            font-family: "Cascadia Code", "Consolas", monospace;
+        }
+
+        .word-display {
+            align-self: center;
+            letter-spacing: 1.2em;
+            text-transform: uppercase;
+            font-size: clamp(18px, 4vw, 28px);
+            color: var(--win-text);
+            margin: 20px 0;
+            font-weight: 600;
+        }
+
+        /* 贪吃蛇 */
+        .snake-canvas {
+            align-self: center;
+            border-radius: 12px;
+            border: 1px solid var(--win-border);
+            background: #ffffff;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.02);
+            margin: 20px 0;
+        }
+
+        .snake-hud {
+            display: flex;
+            justify-content: space-between;
+            align-self: center;
+            width: min(420px, 100%);
+            color: var(--win-text-secondary);
+            font-size: 12.5px;
+            padding: 12px 16px;
+            background: rgba(0, 0, 0, 0.02);
+            border-radius: 8px;
+            margin-top: 8px;
+        }
+
+        /* 工具类 */
+        .hidden { display: none !important; }
+
+        footer {
+            color: var(--win-text-tertiary);
+            font-size: 11px;
+            letter-spacing: 0.5em;
+            text-transform: uppercase;
+            text-align: center;
+            padding: 40px 16px;
+        }
+
+        @media (max-width: 640px) {
+            .nav-menu { display: none; }
+            .layout { padding: 0 16px 40px; gap: 16px; }
+            .panel { order: 2; }
+            .terminal { order: 1; }
+            .board {
+                grid-template-columns: repeat(3, minmax(70px, 90px));
+                grid-template-rows: repeat(3, minmax(70px, 90px));
+                gap: 8px;
+            }
+            .terminal-body {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航 -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="nav-logo">HDF 创作</a>
+            <ul class="nav-menu">
+                <li><a href="index.html" class="nav-link">返回首页</a></li>
+                <li><a href="#" class="nav-link active">终端游戏</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- 页面头部 -->
+    <header class="page-header">
+        <h1 class="page-title">终端小游戏合集</h1>
+        <p class="page-desc">
+            经典命令行小游戏，现已以现代化界面呈现。<br>
+            支持猜数字、井字棋、猜单词、贪吃蛇四款小游戏。
+        </p>
+    </header>
+
+    <!-- 主内容 -->
+    <div class="layout">
+        <!-- 左侧菜单 -->
+        <aside class="panel">
+            <div class="panel-header">
+                <div class="dots">
+                    <span class="dot red"></span>
+                    <span class="dot yellow"></span>
+                    <span class="dot green"></span>
+                </div>
+                <span class="panel-title">MENU</span>
+                <span></span>
+            </div>
+            <nav class="menu">
+                <button class="menu-item active" data-game="guess"><span class="num">[01]</span><span class="label">猜数字</span></button>
+                <button class="menu-item" data-game="tictactoe"><span class="num">[02]</span><span class="label">井字棋</span></button>
+                <button class="menu-item" data-game="hangman"><span class="num">[03]</span><span class="label">猜单词</span></button>
+                <button class="menu-item" data-game="snake"><span class="num">[04]</span><span class="label">贪吃蛇</span></button>
+            </nav>
+            <div style="padding: 0 18px 18px; position: relative; z-index: 1;">
+                <button class="restart-btn" id="restart-btn">重新开始</button>
+            </div>
+        </aside>
+
+        <!-- 右侧游戏区域 -->
+        <main class="terminal">
+            <div class="panel-header">
+                <div class="dots">
+                    <span class="dot red"></span>
+                    <span class="dot yellow"></span>
+                    <span class="dot green"></span>
+                </div>
+                <span class="panel-title" id="terminal-title">guess-number</span>
+                <span class="panel-title">tty1</span>
+            </div>
+            <div class="terminal-body">
+                <div class="log" id="log"></div>
+                <div class="board hidden" id="ttt-board">
+                    <button class="board-cell empty" data-idx="0"></button>
+                    <button class="board-cell empty" data-idx="1"></button>
+                    <button class="board-cell empty" data-idx="2"></button>
+                    <button class="board-cell empty" data-idx="3"></button>
+                    <button class="board-cell empty" data-idx="4"></button>
+                    <button class="board-cell empty" data-idx="5"></button>
+                    <button class="board-cell empty" data-idx="6"></button>
+                    <button class="board-cell empty" data-idx="7"></button>
+                    <button class="board-cell empty" data-idx="8"></button>
+                </div>
+                <pre class="hangman-art hidden" id="hangman-art"></pre>
+                <div class="word-display hidden" id="hangman-word"></div>
+                <canvas class="snake-canvas hidden" id="snake-canvas" width="420" height="420"></canvas>
+                <div class="snake-hud hidden" id="snake-hud">
+                    <span>分数：<span id="snake-score">0</span></span>
+                    <span>最高：<span id="snake-high">0</span></span>
+                    <span>方向：↑ ↓ ← → 控制</span>
+                </div>
+                <form class="prompt-line" id="prompt-form">
+                    <span class="prompt">guest@terminal:~$</span>
+                    <input class="prompt-input" id="prompt-input" autocomplete="off" spellcheck="false" placeholder="输入命令..." />
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <footer>HDF · TERMINAL GAMES</footer>
+
+    <script>
+        const logEl = document.getElementById("log"),
+            promptForm = document.getElementById("prompt-form"),
+            promptInput = document.getElementById("prompt-input"),
+            menuItems = document.querySelectorAll(".menu-item"),
+            terminalTitle = document.getElementById("terminal-title"),
+            tttBoard = document.getElementById("ttt-board"),
+            tttCells = tttBoard.querySelectorAll(".board-cell"),
+            hangmanArt = document.getElementById("hangman-art"),
+            hangmanWord = document.getElementById("hangman-word"),
+            snakeCanvas = document.getElementById("snake-canvas"),
+            snakeHud = document.getElementById("snake-hud"),
+            snakeScoreEl = document.getElementById("snake-score"),
+            snakeHighEl = document.getElementById("snake-high");
+
+        const ctx = snakeCanvas.getContext("2d"),
+            gridSize = 20,
+            tileCount = snakeCanvas.width / gridSize;
+
+        const HANGMAN_STAGES = [
+            "           +---+\n           |   |\n               |\n               |\n               |\n               |\n        =========",
+            "           +---+\n           |   |\n           O   |\n               |\n               |\n               |\n        =========",
+            "           +---+\n           |   |\n           O   |\n           |   |\n               |\n               |\n        =========",
+            "           +---+\n           |   |\n           O   |\n          /|   |\n               |\n               |\n        =========",
+            "           +---+\n           |   |\n           O   |\n          /|\\  |\n               |\n               |\n        =========",
+            "           +---+\n           |   |\n           O   |\n          /|\\  |\n          /    |\n               |\n        =========",
+            "           +---+\n           |   |\n           O   |\n          /|\\  |\n          / \\  |\n               |\n        ========="
+        ];
+
+        const WORDS = [
+            "python", "terminal", "keyboard", "computer", "programming",
+            "developer", "algorithm", "function", "variable", "console",
+            "script", "library", "framework", "interface", "database",
+            "network", "server", "client", "memory", "process",
+            "binary", "string", "integer", "boolean", "compiler",
+            "debugger", "recursive", "iteration"
+        ];
+
+        let currentGame = "guess",
+            state = {},
+            snakeTimer = null;
+
+        function log(t, type = "text") {
+            const l = document.createElement("div");
+            l.className = "log-line " + type;
+            l.textContent = t;
+            logEl.appendChild(l);
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+
+        function clearLog() {
+            logEl.innerHTML = "";
+        }
+
+        function randomInt(a, b) {
+            return Math.floor(Math.random() * (b - a + 1)) + a;
+        }
+
+        function randomFood() {
+            return {
+                x: Math.floor(Math.random() * tileCount),
+                y: Math.floor(Math.random() * tileCount)
+            };
+        }
+
+        function setGame(g) {
+            currentGame = g;
+            menuItems.forEach(i => i.classList.toggle("active", i.dataset.game === g));
+            tttBoard.classList.add("hidden");
+            hangmanArt.classList.add("hidden");
+            hangmanWord.classList.add("hidden");
+            snakeCanvas.classList.add("hidden");
+            snakeHud.classList.add("hidden");
+            clearInterval(snakeTimer);
+            snakeTimer = null;
+            if (g === "guess") {
+                terminalTitle.textContent = "guess-number";
+                startGuess();
+            } else if (g === "tictactoe") {
+                terminalTitle.textContent = "tic-tac-toe";
+                startTicTacToe();
+            } else if (g === "hangman") {
+                terminalTitle.textContent = "hangman";
+                startHangman();
+            } else if (g === "snake") {
+                terminalTitle.textContent = "snake";
+                startSnake();
+            }
+        }
+
+        menuItems.forEach(i => i.addEventListener("click", () => setGame(i.dataset.game)));
+
+        document.getElementById("restart-btn").addEventListener("click", () => {
+            if (currentGame === "guess") startGuess();
+            else if (currentGame === "tictactoe") startTicTacToe();
+            else if (currentGame === "hangman") startHangman();
+            else if (currentGame === "snake") startSnake();
+        });
+
+        promptForm.addEventListener("submit", e => {
+            e.preventDefault();
+            const v = promptInput.value.trim();
+            if (!v) return;
+            log("guest@terminal:~$ " + v, "sub");
+            handleInput(v);
+            promptInput.value = "";
+        });
+
+        function handleInput(v) {
+            if (currentGame === "guess") handleGuess(v);
+            else if (currentGame === "tictactoe") handleTicTacToe(v);
+            else if (currentGame === "hangman") handleHangman(v);
+        }
+
+        /* 猜数字 */
+        function startGuess() {
+            state = { max: 100, target: randomInt(1, 100), attempts: 0, stage: "difficulty" };
+            clearLog();
+            log("==============================================", "system");
+            log("                猜 数 字 游 戏", "system");
+            log("==============================================", "system");
+            log("");
+            log("规则：电脑随机生成一个数字，根据提示猜中它。", "sub");
+            log("");
+            log("选择难度：", "cyan");
+            log("  [1] 简单 (1-50)", "text");
+            log("  [2] 困难 (1-200)", "text");
+            log("  [3] 地狱 (1-500)", "text");
+            log("");
+            log("请输入 1、2 或 3", "sub");
+        }
+
+        function handleGuess(v) {
+            if (state.stage === "difficulty") {
+                if (v === "1") state.max = 50;
+                else if (v === "2") state.max = 200;
+                else if (v === "3") state.max = 500;
+                else {
+                    log("请输入 1、2 或 3", "warn");
+                    return;
+                }
+                state.target = randomInt(1, state.max);
+                state.attempts = 0;
+                state.stage = "play";
+                log("");
+                log(`好，我已经想好了 1 到 ${state.max} 之间的一个数字。开始猜吧！`, "system");
+                log("");
+                return;
+            }
+            if (state.stage === "play") {
+                const n = Number(v);
+                if (isNaN(n)) {
+                    log("请输入一个有效的数字！", "warn");
+                    return;
+                }
+                if (n < 1 || n > state.max) {
+                    log(`⚠ 请在 1 到 ${state.max} 之间输入`, "warn");
+                    return;
+                }
+                state.attempts++;
+                if (n < state.target) log(`第 ${state.attempts} 次：${n} -> 太小了！`, "text");
+                else if (n > state.target) log(`第 ${state.attempts} 次：${n} -> 太大了！`, "text");
+                else {
+                    log("");
+                    log("🎉 恭喜你猜对了！", "system");
+                    log(`   数字是: ${state.target}`, "text");
+                    log(`   猜了: ${state.attempts} 次`, "text");
+                    let r = "…… 继续努力";
+                    if (state.attempts <= 5) r = "⭐⭐⭐ 天才！";
+                    else if (state.attempts <= 10) r = "⭐⭐ 不错嘛";
+                    else if (state.attempts <= 15) r = "⭐ 还行";
+                    log(`   评价: ${r}`, "yellow");
+                    log("");
+                    log("输入任意内容重新开始，或切换左侧菜单", "sub");
+                    state.stage = "again";
+                }
+                return;
+            }
+            if (state.stage === "again") startGuess();
+        }
+
+        /* 井字棋 */
+        function startTicTacToe() {
+            state = { board: Array(9).fill(""), turn: "X", over: false };
+            clearLog();
+            tttBoard.classList.remove("hidden");
+            tttCells.forEach(c => {
+                c.textContent = "";
+                c.className = "board-cell empty";
+            });
+            log("==============================================", "system");
+            log("           井 字 棋  -  Tic-Tac-Toe", "system");
+            log("==============================================", "system");
+            log("");
+            log("玩家 X vs 玩家 O，连成一条线就赢！", "sub");
+            log("");
+            log("点击棋盘下子，或输入 1-9", "sub");
+            log("");
+            log("当前回合：X", "cyan");
+        }
+
+        tttBoard.addEventListener("click", e => {
+            if (currentGame !== "tictactoe" || state.over) return;
+            const c = e.target.closest(".board-cell");
+            if (!c) return;
+            placeTTT(Number(c.dataset.idx));
+        });
+
+        function placeTTT(idx) {
+            if (state.board[idx]) {
+                log("这个位置已经被占用了", "warn");
+                return;
+            }
+            state.board[idx] = state.turn;
+            const c = tttCells[idx];
+            c.textContent = state.turn;
+            c.classList.remove("empty");
+            c.classList.add(state.turn.toLowerCase());
+            const w = checkTTT();
+            if (w) {
+                state.over = true;
+                log("");
+                log(`玩家 ${w} 赢了！`, "system");
+                log("切换到其他游戏或重新开始", "sub");
+                return;
+            }
+            if (state.board.every(x => x)) {
+                state.over = true;
+                log("");
+                log("平局！", "yellow");
+                log("切换到其他游戏或重新开始", "sub");
+                return;
+            }
+            state.turn = state.turn === "X" ? "O" : "X";
+            log(`当前回合：${state.turn}`, "cyan");
+        }
+
+        function handleTicTacToe(v) {
+            if (state.over) {
+                startTicTacToe();
+                return;
+            }
+            const n = Number(v);
+            if (isNaN(n) || n < 1 || n > 9) {
+                log("请输入 1-9 对应格子编号", "warn");
+                return;
+            }
+            placeTTT(n - 1);
+        }
+
+        function checkTTT() {
+            const lines = [
+                [0, 1, 2], [3, 4, 5], [6, 7, 8],
+                [0, 3, 6], [1, 4, 7], [2, 5, 8],
+                [0, 4, 8], [2, 4, 6]
+            ];
+            for (const l of lines) {
+                const [a, b, c] = l;
+                if (state.board[a] && state.board[a] === state.board[b] && state.board[a] === state.board[c])
+                    return state.board[a];
+            }
+            return null;
+        }
+
+        /* 猜单词 */
+        function startHangman() {
+            const w = WORDS[Math.floor(Math.random() * WORDS.length)];
+            state = { word: w, guessed: new Set(), wrong: 0, maxWrong: 6, over: false };
+            clearLog();
+            hangmanArt.classList.remove("hidden");
+            hangmanWord.classList.remove("hidden");
+            hangmanArt.textContent = HANGMAN_STAGES[0];
+            updateHang();
+            log("==============================================", "system");
+            log("              猜 单 词  -  Hangman", "system");
+            log("==============================================", "system");
+            log("");
+            log("规则：猜字母拼出单词，错 6 次就输了", "sub");
+            log(`单词长度: ${w.length} 个字母`, "cyan");
+            log("");
+        }
+
+        function updateHang() {
+            hangmanArt.textContent = HANGMAN_STAGES[Math.min(state.wrong, state.maxWrong)];
+            hangmanWord.textContent = state.word.split("").map(c => state.guessed.has(c) ? c : "_").join(" ");
+        }
+
+        function handleHangman(v) {
+            if (state.over) {
+                startHangman();
+                return;
+            }
+            if (v === "quit") {
+                log(`正确答案是: ${state.word}`, "yellow");
+                startHangman();
+                return;
+            }
+            if (v.length !== 1 || !/[a-z]/.test(v)) {
+                log("请输入一个英文字母", "warn");
+                return;
+            }
+            if (state.guessed.has(v)) {
+                log(`你已经猜过 '${v}' 了`, "warn");
+                return;
+            }
+            state.guessed.add(v);
+            if (!state.word.includes(v)) {
+                state.wrong++;
+                log(`✗ '${v}' 不在单词中！还剩 ${state.maxWrong - state.wrong} 次机会`, "error");
+            } else {
+                log(`✓ '${v}' 猜对了！`, "system");
+            }
+            updateHang();
+            if ([...state.word].every(c => state.guessed.has(c))) {
+                state.over = true;
+                log("");
+                log("🎉 恭喜你猜对了！", "system");
+                log(`   单词: ${state.word}`, "text");
+                log(`   猜错次数: ${state.wrong}`, "text");
+                log("");
+                log("输入任意内容再来一局", "sub");
+                return;
+            }
+            if (state.wrong >= state.maxWrong) {
+                state.over = true;
+                log("");
+                log("💀 你输了！", "error");
+                log(`   正确答案是: ${state.word}`, "yellow");
+                log("");
+                log("输入任意内容再来一局", "sub");
+            }
+        }
+
+        /* 贪吃蛇 */
+        function startSnake() {
+            state = {
+                snake: [{ x: 10, y: 10 }],
+                dx: 1,
+                dy: 0,
+                food: randomFood(),
+                score: 0,
+                high: Number(localStorage.getItem("snake-high") || 0),
+                over: false
+            };
+            clearLog();
+            snakeCanvas.classList.remove("hidden");
+            snakeHud.classList.remove("hidden");
+            snakeScoreEl.textContent = "0";
+            snakeHighEl.textContent = String(state.high);
+            log("==============================================", "system");
+            log("                  贪 吃 蛇", "system");
+            log("==============================================", "system");
+            log("");
+            log("使用 ↑ ↓ ← → 控制方向，吃到食物得分", "sub");
+            log("撞墙或咬到自己即游戏结束", "sub");
+            log("");
+            drawSnake();
+            clearInterval(snakeTimer);
+            snakeTimer = setInterval(tickSnake, 120);
+        }
+
+        document.addEventListener("keydown", e => {
+            if (currentGame !== "snake" || state.over) return;
+            if (e.key === "ArrowUp" && state.dy !== 1) { state.dx = 0; state.dy = -1; }
+            if (e.key === "ArrowDown" && state.dy !== -1) { state.dx = 0; state.dy = 1; }
+            if (e.key === "ArrowLeft" && state.dx !== 1) { state.dx = -1; state.dy = 0; }
+            if (e.key === "ArrowRight" && state.dx !== -1) { state.dx = 1; state.dy = 0; }
+        });
+
+        function tickSnake() {
+            const h = { x: state.snake[0].x + state.dx, y: state.snake[0].y + state.dy };
+            if (h.x < 0 || h.x >= tileCount || h.y < 0 || h.y >= tileCount) return gameOverSnake();
+            for (let i = 1; i < state.snake.length; i++)
+                if (state.snake[i].x === h.x && state.snake[i].y === h.y) return gameOverSnake();
+            state.snake.unshift(h);
+            if (h.x === state.food.x && h.y === state.food.y) {
+                state.score += 10;
+                snakeScoreEl.textContent = String(state.score);
+                state.food = randomFood();
+            } else {
+                state.snake.pop();
+            }
+            drawSnake();
+        }
+
+        function drawSnake() {
+            ctx.fillStyle = "rgba(255,255,255,0.98)";
+            ctx.fillRect(0, 0, snakeCanvas.width, snakeCanvas.height);
+            ctx.fillStyle = "rgba(0, 103, 192, 0.9)";
+            ctx.beginPath();
+            ctx.arc(
+                state.food.x * gridSize + gridSize / 2,
+                state.food.y * gridSize + gridSize / 2,
+                gridSize / 2 - 2,
+                0,
+                Math.PI * 2
+            );
+            ctx.fill();
+            ctx.fillStyle = "rgba(26, 26, 26, 0.9)";
+            for (let i = 0; i < state.snake.length; i++) {
+                const p = state.snake[i];
+                ctx.fillRect(p.x * gridSize + 2, p.y * gridSize + 2, gridSize - 4, gridSize - 4);
+            }
+        }
+
+        function gameOverSnake() {
+            state.over = true;
+            clearInterval(snakeTimer);
+            snakeTimer = null;
+            if (state.score > state.high) {
+                state.high = state.score;
+                localStorage.setItem("snake-high", String(state.high));
+                snakeHighEl.textContent = String(state.high);
+            }
+            log("");
+            log("游戏结束！", "error");
+            log(`得分：${state.score}   最高：${state.high}`, "text");
+            log("切换到其他游戏重新开始", "sub");
+        }
+
+        startGuess();
+    </script>
+</body>
+</html>
